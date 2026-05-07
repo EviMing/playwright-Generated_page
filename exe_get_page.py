@@ -1,12 +1,12 @@
-从生成页面导入生成页面
-从playwright.
-导入requests
+from Generated_page import Generated_page
+from playwright.sync_api import sync_playwright
+import requests
 
-类exe_get_page(生成的页面):
+class exe_get_page(Generated_page):
 
-     __init__(self,
-url='http://localhost', 端口=9222,
-上下文索引=0, 页面索引=0):
+    def __init__(self,
+                 url='http://localhost', port=9222,
+                 context_index=0, page_index=0):
 
         debug_url = f'{url}:{port}'
 
@@ -24,5 +24,5 @@ url='http://localhost', 端口=9222,
         #直接获取页面，而不用方法单独生成新建页面实例
         self.page = context.pages[page_index]
 
-    定义 关闭(自我):
-        超级().关闭()
+    def close(slef):
+        super().close()
