@@ -57,3 +57,24 @@
     1. **html** 返回当前的页面 __HTML__ 源代码，无参数
 
     1. **close** 关闭实例并卸载内存，无参数
+
+# 基于核心类的子类
+1. **exe_get_page** 通过端口接管已有的浏览器进程
+
+    ```注释
+        对于封装了浏览器的exe程序，一般可通过启动时给exe传参 '--remote-debugging-port=端口' 启动调试端口
+            如果是 Electron 应用，有时会有两个调试端口(一个给主进程，一个给渲染进程/网页内容)
+                如果连接后找不到页面，可以尝试访问 'http://localhost:端口/json'，查看具体的调试 WebSocket 地址
+                    或 'http://localhost:端口/json/version'，webSocketDebuggerUrl 地址
+                    对于DrissionPage库，大部分情况下直接连接 '127.0.0.1:调试端口' 即可
+    ```
+
+    **exe_get_page** 类的方法：
+
+    1. **__init__** 初始化方法，参数：
+        **url** 指定目标IP或URL，默认 __`http://localhost`==`http://127.0.0.1`__
+        **port** 指定目标端口，默认 **9222**
+        **context_index** 浏览器上下文索引，当存在多个 __浏览器上下文__ 时，即多个 __浏览器窗口__ 时，可主动选择
+            //对于 __Electron__ 这种应用，exe 打开后的用户看到的上下文索引一般为 __0__
+        **page_index** page页索引，当存在多个 __page页__，即 __浏览器标签__ 时，可主动选择
+            ////对于 __Electron__ 这种应用，exe 打开后的用户看到的page页索引一般为 __0__
