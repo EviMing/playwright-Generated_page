@@ -1,15 +1,14 @@
-from Generated_page import Generated_page
-from playwright.sync_api import sync_playwright
-import requests
+从生成页面导入生成页面
+从playwright.
+导入requests
 
-class exe_get_page(Generated_page):
+类exe_get_page(生成的页面):
 
-    def __init__(self,
-                 url='http://localhost', port=9222,
-                 context_index=0, page_index=0):
+     __init__(self,
+url='http://localhost', 端口=9222,
+上下文索引=0, 页面索引=0):
 
-        json_data = requests.get(f'{url}:{port}/json/version').json()
-        debug_url = json_data['webSocketDebuggerUrl']
+        debug_url = f'{url}:{port}'
 
         #启动 Playwright
         p = sync_playwright()
@@ -25,5 +24,5 @@ class exe_get_page(Generated_page):
         #直接获取页面，而不用方法单独生成新建页面实例
         self.page = context.pages[page_index]
 
-    def close(slef):
-        super().close()
+    定义 关闭(自我):
+        超级().关闭()
