@@ -17,9 +17,9 @@ class Generated_page:
         #启动 Playwright
         p = sync_playwright()
         #启动浏览器内核
-        self.playwright = p.start()
+        self.playwright_ = p.start()
         #创建浏览器实例
-        self.browser = self.playwright.chromium.launch(
+        self.browser = self.playwright_.chromium.launch(
             executable_path=browser_path,
             headless= not look_window,
             slow_mo=1000,
@@ -49,7 +49,7 @@ class Generated_page:
 
     #[定义方法] 跳转页面
     def goto(self, url, timeout=30):
-        self.page.goto(url, wait_until="domcontentloaded",timeout=timeout*1000)
+        self.page.goto(url, wait_until="domcontentloaded", timeout=timeout*1000)
 
     #[定义方法] 利用CSS选择器获取DOM元素或元素的属性值
     def get_DOM(self, css_selector, get_attribute_name:None|str=None):
@@ -103,23 +103,23 @@ class Generated_page:
         return (x,y)
     #[定义方法] 按下单个鼠标按键
     def mouse_key_down(self, key:Literal['left','right','middle']='left'):
-        self.page.mouse.down(key)
+        self.page.mouse.down(button=key)
     #[定义方法] 抬起单个鼠标按键
     def mouse_key_up(self, key:Literal['left','right','middle']='left'):
-        self.page.mouse.up(key)
+        self.page.mouse.up(button=key)
     #[定义方法] 鼠标平面移动
-    def mouse_move(self, x, y):
-        self.page.mouse.move(x, y)
+    def mouse_move(self, x, y, steps:None|int=None):
+        self.page.mouse.move(x, y, steps=steps)
     #[定义方法] 模拟鼠标滚轮上下滚动
     def mose_wheel(self, delta_x=0, delta_y=500, Declaration='正数默认向[右,下]方移动，负数为相反方向'):
         self.page.mouse.wheel(delta_x, delta_y)
 
     #[定义方法] 按下单个键盘按键
     def key_press(self, key):
-        self.page.keyboard.press(key)
+        self.page.keyboard.press(button=key)
     #[定义方法] 抬起单个键盘按键
     def key_up(self, key):
-        self.page.keyboard.up(key)
+        self.page.keyboard.up(button=key)
 
     #[定义方法] 保存登录态为 JSON 文件
     def save_LogIn_state(self, FilePath):
@@ -132,4 +132,4 @@ class Generated_page:
     #[定义方法] 关闭实例
     def close(self):
         self.browser.close()
-        self.playwright.stop()
+        self.playwright_.stop()
