@@ -12,7 +12,14 @@ class Generated_page:
                  #[参数] 是否显示浏览器窗口
                  look_window=False,
                  #[参数]指定浏览器路径
-                 browser_path=r"D:\Quark\quark.exe"):
+                 browser_path=r"D:\Quark\quark.exe",
+                 proxy:dict[str,str]={
+                     'server':str,
+                     'username':None,
+                     'password':None,
+                     'bypass':None
+                 }
+        ):
 
         #启动 Playwright
         p = sync_playwright()
@@ -23,6 +30,11 @@ class Generated_page:
             executable_path=browser_path,
             headless= not look_window,
             slow_mo=1000,
+            proxy= {'server':proxy['proxy'],
+                    'username':proxy['user'] if proxy.get('user') else None,
+                    'password':proxy['password'] if proxy.get('password') else None,
+                    'bypass':proxy['bypass'] if proxy.get('bypass') else None
+                    } if proxy != {} else None
         )
 
         context = None
@@ -64,8 +76,11 @@ class Generated_page:
             return self.page.locator(css_selector).all()
 
     #[定义方法] 执行JS代码
-    def eval_js(self, js_code):
-        return self.page.evaluate(js_code)
+    def eval_js(self, js_code, *parameter):
+        return self.page.evaluate(js_code, *parameter)
+    
+    def eval_js_handle(self, js_code, *parameter):
+        return self.page.evaluate_handle(js_code, *parameter)
 
     #[定义方法] 点击元素
     def click(self, css_selector, text:None|str=None, index:None|int=None,
@@ -73,16 +88,10 @@ class Generated_page:
 
         DOM = None
 
-        if type(text) == str:
-            if index != None:
-                DOM = self.page.locator(css_selector, has_text=text).nth(index)
-            else:
-                DOM = self.page.locator(css_selector, has_text=text)
+        if type(index) == int:
+            DOM = self.page.locator(css_selector, has_text= text if type(text) == str else None).nth(index)
         else:
-            if index != None:
-                DOM = self.page.locator(css_selector).nth(index)
-            else:
-                DOM = self.page.locator(css_selector)
+            DOM = self.page.locator(css_selector, has_text= text if type(text) == str else None)
 
         #手动移动到元素中心点击，防止出现遮罩阻挡点击事件
         DOM.hover()
