@@ -17,11 +17,11 @@
         - **LogIn_state_FilePath** 登录状态文件路径，为 __None__ 时表示不进行自动登录，为 __字符串__ 时表示从传参的路径中读取登录态
         - **look_window** 是否显示浏览器窗口，为 __True__ 时显示，为 __False__ 时不显示
         - **browser_path** 指定 __浏览器.exe__ 可执行文件路径
-        - **proxy** 字典，结构：{
-                'proxy': '代理地址',
+        - **proxy** 字典，默认为空字典，结构：{
+                'proxy': '代理地址,默认为 None',
                 'user': '提供账号，默认为 None',
                 'password': '提供密码，默认为 None',
-                'bypass': '不走代理的地址，每个用逗号分隔'
+                'bypass': '不走代理的地址，每个用逗号分隔，默认为 None'
             }
 
     1. **goto** 跳转页面，参数：
@@ -30,7 +30,7 @@
 
     1. **eval_js** 执行JavaScript代码，参数：
         - **js_code** 执行的JavaScript代码，如果要有返回给 Python 的返回值，则必须是一个 __箭头函数__
-        - **parameter** 当箭头函数需要参数时传参，除第一个参数以外的位置参数都会视为 __parameter__ 参数的一部分
+        - **parameter** 当执行箭头函数需要参数时传参，除第一个参数以外的位置参数都会视为 __parameter__ 参数的一部分
 
     1. **eval_js_handle** 执行JavaScript代码，但返回的是一个JavaScript对象，且可以被再次传入给执行方法
         **参数和 eval_js 一样**
