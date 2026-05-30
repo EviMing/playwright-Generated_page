@@ -13,12 +13,7 @@ class Generated_page:
                  look_window=False,
                  #[参数]指定浏览器路径
                  browser_path=r"D:\Quark\quark.exe",
-                 proxy:dict[str,str]={
-                     'server':str,
-                     'username':None,
-                     'password':None,
-                     'bypass':None
-                 }
+                 proxy:dict[str,str]={}
         ):
 
         #启动 Playwright
@@ -30,11 +25,11 @@ class Generated_page:
             executable_path=browser_path,
             headless= not look_window,
             slow_mo=1000,
-            proxy= {'server':proxy['proxy'],
-                    'username':proxy['user'] if proxy.get('user') else None,
-                    'password':proxy['password'] if proxy.get('password') else None,
-                    'bypass':proxy['bypass'] if proxy.get('bypass') else None
-                    } if proxy != {} else None
+            proxy= {'server':proxy.get('proxy'),
+                    'username':proxy.get('user'),
+                    'password':proxy.get('password'),
+                    'bypass':proxy.get('bypass')
+            } if proxy != {} else None
         )
 
         context = None
@@ -77,7 +72,7 @@ class Generated_page:
 
     #[定义方法] 执行JS代码
     def eval_js(self, js_code, *parameter):
-        return self.page.evaluate(js_code, *parameter)
+        return self.page.evaluate(js_code, list(parameter))
     
     def eval_js_handle(self, js_code, *parameter):
         return self.page.evaluate_handle(js_code, *parameter)
