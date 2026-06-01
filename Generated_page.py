@@ -61,11 +61,11 @@ class Generated_page:
 
     #[定义方法] 执行JS代码
     def eval_js(self, js_code, parameter :dict={}):
-        return self.page.evaluate(js_code, parameter)
+        return self.page.evaluate(js_code, parameter if parameter != {} else None)
 
     #[定义方法] 执行JS代码并返回JSHandle对象
-    def eval_js_handle(self, js_code, *parameter):
-        return self.page.evaluate_handle(js_code, *parameter)
+    def eval_js_handle(self, js_code, parameter :dict={}):
+        return self.page.evaluate_handle(js_code, parameter if parameter != {} else None)
 
     #[定义方法] 利用CSS选择器获取DOM元素或元素的属性值
     def get_DOM(self, css_selector, get_attribute_name:None|str=None):
