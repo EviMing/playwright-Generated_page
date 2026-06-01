@@ -30,7 +30,9 @@
 
     1. **eval_js** 执行JavaScript代码，参数：
         - **js_code** 执行的JavaScript代码，如果要有返回给 Python 的返回值，则必须是一个 __箭头函数__
-        - **parameter** 当执行箭头函数需要参数时传参，除第一个参数以外的位置参数都会视为 __parameter__ 参数的一部分
+        - **parameter** 当执行箭头函数需要参数时传参，传入字典，结构：{
+                '参数名': 值,
+            }
 
     1. **eval_js_handle** 执行JavaScript代码，但返回的是一个JavaScript对象，且可以被再次传入给执行方法
         **参数和 eval_js 一样**
