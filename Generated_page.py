@@ -71,8 +71,8 @@ class Generated_page:
             return self.page.locator(css_selector).all()
 
     #[定义方法] 执行JS代码
-    def eval_js(self, js_code, *parameter):
-        return self.page.evaluate(js_code, list(parameter))
+    def eval_js(self, js_code, parameter :dict={}):
+        return self.page.evaluate(js_code, parameter)
     
     def eval_js_handle(self, js_code, *parameter):
         return self.page.evaluate_handle(js_code, *parameter)
