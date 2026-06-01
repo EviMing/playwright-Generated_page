@@ -58,6 +58,15 @@ class Generated_page:
     def goto(self, url, timeout=30):
         self.page.goto(url, wait_until="domcontentloaded", timeout=timeout*1000)
 
+
+    #[定义方法] 执行JS代码
+    def eval_js(self, js_code, parameter :dict={}):
+        return self.page.evaluate(js_code, parameter)
+
+    #[定义方法] 执行JS代码并返回JSHandle对象
+    def eval_js_handle(self, js_code, *parameter):
+        return self.page.evaluate_handle(js_code, *parameter)
+
     #[定义方法] 利用CSS选择器获取DOM元素或元素的属性值
     def get_DOM(self, css_selector, get_attribute_name:None|str=None):
 
@@ -69,13 +78,6 @@ class Generated_page:
         #否则返回元素本身
         else:
             return self.page.locator(css_selector).all()
-
-    #[定义方法] 执行JS代码
-    def eval_js(self, js_code, parameter :dict={}):
-        return self.page.evaluate(js_code, parameter)
-    
-    def eval_js_handle(self, js_code, *parameter):
-        return self.page.evaluate_handle(js_code, *parameter)
 
     #[定义方法] 点击元素
     def click(self, css_selector, text:None|str=None, index:None|int=None,
