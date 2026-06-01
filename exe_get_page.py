@@ -1,6 +1,5 @@
 from Generated_page import Generated_page
 from playwright.sync_api import sync_playwright
-import requests
 
 class exe_get_page(Generated_page):
 
