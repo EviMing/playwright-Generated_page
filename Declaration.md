@@ -91,7 +91,7 @@
             如果连接端口后找不到页面，可以尝试请求 'http://localhost:端口/json'，查看 WebSocket 或 webSocketDebuggerUrl 调试地址
             对于 DrissionPage 库，大部分情况下直接连接 '127.0.0.1:调试端口' 即可
     ```
-    ```Python
+    ```python
         import requests
         json = requests.get(f'{url}:{port}/version').json()
         debug_url = json['webSocketDebuggerUrl']
