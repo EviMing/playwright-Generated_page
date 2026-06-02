@@ -88,8 +88,8 @@
     ```注释
         对于封装了浏览器的exe程序，一般可通过启动时给exe传参 '--remote-debugging-port=端口' 启动调试端口
             如果是 Electron 应用，有时会有两个调试端口(一个给主进程，一个给渲染进程/网页内容)
-            如果连接后找不到页面，可以尝试请求 'http://localhost:端口/json'，查看 __WebSocket__ 或 __webSocketDebuggerUrl__ 调试地址
-            对于DrissionPage库，大部分情况下直接连接 '127.0.0.1:调试端口' 即可
+            如果连接端口后找不到页面，可以尝试请求 'http://localhost:端口/json'，查看 WebSocket 或 webSocketDebuggerUrl 调试地址
+            对于 DrissionPage 库，大部分情况下直接连接 '127.0.0.1:调试端口' 即可
     ```
     ```Python
         import requests
