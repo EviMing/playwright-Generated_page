@@ -37,7 +37,7 @@
                 '参数名': 值,
             }   
 
-    1. **eval_js_handle** 执行 JavaScript 代码，但返回的是一个 JSHandle 对象，且可以被再次传入给执行方法
+    1. **eval_js_handle** 执行 JavaScript 代码，但返回的是一个 JavaScript 对象(class JSHandle)，且可以被再次传入给执行方法
         //参数和 eval_js 一样
 
     1. **get_DOM** 获取页面 DOM，参数：
