@@ -29,20 +29,21 @@
         - **url** 跳转的页面
             //跳转时默认等待页面 __DOMContentLoaded__ 事件触发时停止
 
-    1. **eval_js** 执行JavaScript代码，参数：
+    1. **eval_js** 执行 JavaScript 代码，参数：
         - **js_code** 执行的JavaScript代码，如果要有返回给 Python 的返回值，则必须是一个 __箭头函数__
         - **parameter** 当箭头函数需要参数时传参，默认为 None
             箭头函数定义时 = '({参数名,}=>{})'
             传参时传入字典，结构：{
                 '参数名': 值,
-            }
+            }   
 
-    1. **eval_js_handle** 执行JavaScript代码，但返回的是一个JavaScript对象，且可以被再次传入给执行方法
+    1. **eval_js_handle** 执行 JavaScript 代码，但返回的是一个 JSHandle 对象，且可以被再次传入给执行方法
         //参数和 eval_js 一样
 
     1. **get_DOM** 获取页面 DOM，参数：
         - **css_selector** CSS选择器，用于查找页面元素
         - **get_attribute_name** 获取的属性名，为 __None__ 时表示获取元素本身，为 __字符串__ 时表示获取元素的属性值
+        - **index** 为 __None__ 时返回 所有:list，为 __整数__ 时返回第 index 个
 
     1. **click** 直接点击页面元素，先移动，再点击，参数：
         - **CssSelector_or_JSHandle** __CSS选择器__ 或 __JSHandle 对象__
