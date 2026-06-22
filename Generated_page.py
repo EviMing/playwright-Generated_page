@@ -1,4 +1,4 @@
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, JSHandle
 from playwright_stealth import Stealth
 from typing import Literal
 from time import sleep
@@ -58,7 +58,6 @@ class Generated_page:
     def goto(self, url, timeout=30):
         self.page.goto(url, wait_until="domcontentloaded", timeout=timeout*1000)
 
-
     #[定义方法] 执行JS代码
     def eval_js(self, js_code, parameter :dict={}):
         return self.page.evaluate(js_code, parameter if parameter != {} else None)
@@ -80,27 +79,33 @@ class Generated_page:
             return self.page.locator(css_selector).all()
 
     #[定义方法] 点击元素
-    def click(self, css_selector, text:None|str=None, index:None|int=None,
+    def click(self, CssSelector_or_JSHandle, DOM_text:None|str=None, index:None|int=None,
                     key:Literal['left','right','middle']='left'):
 
-        DOM = None
+        DOM_class = type(CssSelector_or_JSHandle)
+        if DOM_class == str:
 
-        if type(index) == int:
-            DOM = self.page.locator(css_selector, has_text= text if type(text) == str else None).nth(index)
-        else:
-            DOM = self.page.locator(css_selector, has_text= text if type(text) == str else None)
+            DOM = None
 
-        #手动移动到元素中心点击，防止出现遮罩阻挡点击事件
-        DOM.hover()
-        self.page.mouse.down(button=key)
-        sleep(0.1)
-        self.page.mouse.up(button=key)
+            if type(index) == int:
+                DOM = self.page.locator(CssSelector_or_JSHandle, has_text= DOM_text if type(DOM_text) == str else None).nth(index)
+            else:
+                DOM = self.page.locator(CssSelector_or_JSHandle, has_text= DOM_text if type(DOM_text) == str else None)
+
+            #手动移动到元素中心点击，防止出现遮罩阻挡点击事件
+            DOM.hover()
+            self.page.mouse.down(button=key)
+            sleep(0.1)
+            self.page.mouse.up(button=key)
+
+        elif DOM_class == JSHandle:
+            self.eval_js('(DOM)=>{DOM.click();};', {'DOM': CssSelector_or_JSHandle})
 
     #[定义方法] 获取元素坐标
-    def get_element_coordinate(self, css_selector, text:None|str=None):
+    def get_element_coordinate(self, css_selector, DOM_text:None|str=None):
         DOM = None
-        if type(text) == str:
-            DOM = self.page.locator(css_selector, has_text=text)
+        if type(DOM_text) == str:
+            DOM = self.page.locator(css_selector, has_text=DOM_text)
         else:
             DOM = self.page.locator(css_selector)
         box = DOM.bounding_box()
@@ -108,10 +113,10 @@ class Generated_page:
         y = box['y'] + box['height'] / 2
         return (x,y)
     #[定义方法] 按下单个鼠标按键
-    def mouse_key_down(self, key:Literal['left','right','middle']='left'):
+    def mouse_down(self, key:Literal['left','right','middle']='left'):
         self.page.mouse.down(button=key)
     #[定义方法] 抬起单个鼠标按键
-    def mouse_key_up(self, key:Literal['left','right','middle']='left'):
+    def mouse_up(self, key:Literal['left','right','middle']='left'):
         self.page.mouse.up(button=key)
     #[定义方法] 鼠标平面移动
     def mouse_move(self, x, y, steps:None|int=None):
@@ -121,7 +126,7 @@ class Generated_page:
         self.page.mouse.wheel(delta_x, delta_y)
 
     #[定义方法] 按下单个键盘按键
-    def key_press(self, key):
+    def key_down(self, key):
         self.page.keyboard.press(button=key)
     #[定义方法] 抬起单个键盘按键
     def key_up(self, key):
