@@ -59,11 +59,11 @@ class Generated_page:
         self.page.goto(url, wait_until="domcontentloaded", timeout=timeout*1000)
 
     #[定义方法] 执行JS代码
-    def eval_js(self, js_code, parameter :dict={}):
+    def eval_js(self, js_code, parameter:dict={}):
         return self.page.evaluate(js_code, parameter if parameter != {} else None)
 
     #[定义方法] 执行JS代码并返回JSHandle对象
-    def eval_js_handle(self, js_code, parameter :dict={}):
+    def eval_js_handle(self, js_code, parameter:dict={}):
         return self.page.evaluate_handle(js_code, parameter if parameter != {} else None)
 
     #[定义方法] 利用CSS选择器获取DOM元素或元素的属性值
