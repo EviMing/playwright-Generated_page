@@ -67,16 +67,24 @@ class Generated_page:
         return self.page.evaluate_handle(js_code, parameter if parameter != {} else None)
 
     #[定义方法] 利用CSS选择器获取DOM元素或元素的属性值
-    def get_DOM(self, css_selector, get_attribute_name:None|str=None):
+    def get_DOM(self, css_selector, get_attribute_name:None|str=None, index:None|int=None):
 
         #已知属性名时返回属性值
         if type(get_attribute_name) == str:
             list_ = self.page.locator(css_selector).all()
-            return [i.get_attribute(get_attribute_name) for i in list_]
+            #已知索引值时返回第 index 个
+            if type(index) == int:
+                return list_[index].get_attribute(get_attribute_name)
+            #否则返回 所有:list
+            else:
+                return [i.get_attribute(get_attribute_name) for i in list_]
 
         #否则返回元素本身
         else:
-            return self.page.locator(css_selector).all()
+            if type(index) == int:
+                return list_[index]
+            else:
+                return self.page.locator(css_selector).all()
 
     #[定义方法] 点击元素
     def click(self, CssSelector_or_JSHandle, DOM_text:None|str=None, index:None|int=None,
