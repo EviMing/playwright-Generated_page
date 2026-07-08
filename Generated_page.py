@@ -1,5 +1,5 @@
-#作者：伊茗(QQ：2368199809，邮箱：2368199809@qq.com)
-#[伊茗的GitHub仓库] 'https://github.com/EviMing/'
+#作者：伊茗(微信：EviMing，QQ：2368199809，邮箱：2368199809@qq.com)
+#[伊茗的GitHub仓库] = 'https://github.com/EviMing/'
     #此文件所处项目 = https://github.com/EviMing/playwright-Generated_page
 
 from playwright.sync_api import sync_playwright, Locator
