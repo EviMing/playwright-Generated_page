@@ -1,3 +1,7 @@
+#作者：伊茗(微信：EviMing，QQ：2368199809，邮箱：2368199809@qq.com)
+#[伊茗的GitHub仓库] = 'https://github.com/EviMing/'
+    #此文件所处项目 = https://github.com/EviMing/playwright-Generated_page
+
 from Generated_page import Generated_page
 from playwright.sync_api import sync_playwright
 
@@ -23,5 +27,5 @@ class exe_get_page(Generated_page):
         #直接获取页面，而不用方法单独生成新建页面实例
         self.page = context.pages[page_index]
 
-    def close(slef):
+    def close(self):
         super().close()
