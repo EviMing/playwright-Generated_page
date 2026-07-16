@@ -1,6 +1,6 @@
 #作者：伊茗(微信：__EviMing__，QQ：__2368199809__，邮箱：__2368199809@qq.com__)
 
-注释：由于我懒得一个个对方法进行排序，所以MD源代码里有序列表统一用'`1.`'，转HTML时交给库来渲染
+注释：由于我懒得一个个对方法进行排序，所以MD源代码里有用到[有序列表]的部分统一用'`1.`'，转HTML时交给库来渲染
 
 # 注释：
 1. 该项目是一套基于'playwright'库的方法集，定义了常用的操作，可以用更方便的语句操作page
@@ -11,7 +11,7 @@
     ```Python
     import sys
     sys.path.append("../#Generated_page")
-    import Generated_page #pyright: ignore[reportMissingImports]
+    from Generated_page import Generated_page #pyright: ignore[reportMissingImports]
     ```
 
 ### 遇到奇奇怪怪的bug时：
