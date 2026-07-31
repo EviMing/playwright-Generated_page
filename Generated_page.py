@@ -110,7 +110,7 @@ class Generated_page:
             )
         #否则返回元素本身
         else:
-            return list_or_locator
+            return list_or_locator if type(list_or_locator)==list else list_or_locator[index]
 
     #[定义方法] 点击元素
     def click(self, css_selector, text:None|str=None, index:None|int=None,
