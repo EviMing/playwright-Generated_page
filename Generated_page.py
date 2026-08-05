@@ -1,25 +1,32 @@
-#作者：伊茗(微信：EviMing，QQ：2368199809，邮箱：2368199809@qq.com)
+#作者：伊茗(微信：EviMing, QQ：2368199809, 邮箱：2368199809@qq.com)
 #[伊茗的GitHub仓库] = 'https://github.com/EviMing/'
-    #此文件所处项目 = https://github.com/EviMing/playwright-Generated_page
+    #此文件所处项目 = 'https://github.com/EviMing/playwright-Generated_page'
 
-from playwright.sync_api import sync_playwright, Locator
+from playwright.sync_api import sync_playwright, Locator, JSHandle
 from playwright_stealth import Stealth
-from typing import Literal
+from typing import Literal, Any
 from time import sleep
 
 class Generated_page:
+    '#Literal[\'self\', \'return\', \'close\'] -> (表示事件而非返回值)'
 
     #[定义属性] 生成安全的上下文实例
     def __init__(self,
-                 #[参数] 是否从文件获取登录态
-                 LogIn_state_FilePath:None|str=None,
-                 #[参数] 是否显示浏览器窗口
-                 look_window=False,
-                 #[参数]指定浏览器路径
-                 browser_path=r"D:\Quark\quark.exe",
-                 proxy:None|dict[str,str|list[str]]=None
-        ):
+        #[参数] 是否从文件获取登录态
+        LogIn_state_FilePath:None|str=None,
+        #[参数] 是否显示浏览器窗口
+        look_window=False,
+        #[参数]指定浏览器路径
+        browser_path=r"D:\Quark\quark.exe",
+        proxy:None|dict[str,str]=None,
+        #[参数] 指定全局的 timeout(单位=秒)
+        timeout:int=30
+    ) -> Literal['self']:
 
+        #创建全局 timeout 默认值
+        self.timeout = timeout
+
+        #代理字典
         proxy_ = {}
         #代理字典不为空时提取键
         if proxy:
@@ -72,56 +79,94 @@ class Generated_page:
         self.page = context.new_page()
 
     #[定义方法] 跳转页面
-    def goto(self, url, timeout=30):
-        self.page.goto(url, wait_until="domcontentloaded", timeout=timeout*1000)
+    def goto(self,
+        #[参数] 跳转的目标URL
+        url,
+        #[参数] timeout(单位=秒)，默认使用全局 timeout
+        timeout:int|Literal['self.timeout']='self.timeout'
+    ) -> Literal['return']:
+        self.page.goto(url, wait_until="domcontentloaded", timeout=int((self.timeout if timeout == 'self.timeout' else timeout)*1000))
 
     #[定义方法] 执行JS代码
-    def eval_js(self, js_code, parameter:dict={}):
+    def eval_js(self,
+        #[参数] JavaScript 代码
+        js_code,
+        #[参数] JavaScript 参数字典 -> dict['参数名', 参数值]
+        parameter:dict={}
+    ) -> Any:
         return self.page.evaluate(js_code, parameter if parameter != {} else None)
 
     #[定义方法] 执行JS代码并返回JSHandle对象
-    def eval_js_handle(self, js_code, parameter:dict={}):
+    def eval_js_handle(self,
+        #[参数] JavaScript 代码
+        js_code,
+        #[参数] JavaScript 参数字典 -> dict['参数名', 参数值]
+        parameter:dict={}
+    ) -> JSHandle:
         return self.page.evaluate_handle(js_code, parameter if parameter != {} else None)
 
     #[定义函数] 等待元素出现
-    def waiting_DOM(self, css_selector, text:None|str=None, min_number:int=1, timeout=30):
-        self.page.locator(css_selector, has_text=text).nth(min_number-1).wait_for(timeout=int(timeout*1000))
+    def waiting_DOM(self,
+        #[参数] selector=选择器, text=元素文本, not_text=元素不允许存在的文本
+        selector:str, text:None|str=None, not_text:None|str=None,
+        #[参数] 元素存在的最小个数
+        min_number:int=1,
+        #[参数] timeout(单位=秒), 默认使用全局 timeout
+        timeout:int|Literal['self.timeout']='self.timeout'
+    ) -> Literal['return']:
+        self.page.locator(selector, has_text=text, has_not_text=not_text).nth(min_number-1).wait_for(timeout=int((self.timeout if timeout == 'self.timeout' else timeout)*1000))
 
     #[定义方法] 利用CSS选择器获取 DOM元素 或 元素的属性值
-    def get_DOM(self, css_selector, text:None|str=None, get_attribute_name:None|str=None, index:None|int=None):
+    def get_DOM(self,
+        #[参数] selector=选择器, text=元素文本, not_text=元素不允许存在的文本
+        selector:str, text:None|str=None, not_text:None|str=None,
+        #[参数] 指定第 index 个元素, 默认'all'返回所有元素
+        index:Literal['all']|int='all',
+        #[参数] 不为 None 时返回数据由 元素本身 变为 元素指定属性名的值
+        get_attribute_name:None|str=None
+    ) -> (list[Locator]|Locator) | (list[str]|str):
 
         list_or_locator :list[Locator]|Locator = None
         #已知索引值时返回第 index 个
         if type(index) == int:
-            list_or_locator = self.page.locator(css_selector, has_text=text).nth(index)
+            list_or_locator = self.page.locator(selector, has_text=text, has_not_text=not_text).nth(index)
         #否则返回 所有:list
+        elif index == 'all':
+            list_or_locator = self.page.locator(selector, has_text=text, has_not_text=not_text).all()
         else:
-            list_or_locator = self.page.locator(css_selector).all()
+            raise ValueError('#-> \'index\' 参数值错误')
 
         #已知属性名时返回属性值
         if type(get_attribute_name) == str:
             return (
-                    [
-                        i.get_attribute(get_attribute_name)
-                        for i in list_or_locator
-                    ]
-                    if type(list_or_locator)==list
-                    else list_or_locator.get_attribute(get_attribute_name)
+                [
+                    i.get_attribute(get_attribute_name)
+                    for i in list_or_locator
+                ]
+                if type(list_or_locator) == list
+                else list_or_locator.get_attribute(get_attribute_name)
             )
         #否则返回元素本身
         else:
-            return list_or_locator if type(list_or_locator)==list else list_or_locator[index]
+            return (list_or_locator if type(list_or_locator) == list else list_or_locator[index])
 
     #[定义方法] 点击元素
-    def click(self, css_selector, text:None|str=None, index:None|int=None,
-                    key:Literal['left','right','middle']='left'):
+    def click(self,
+        #[参数] selector=选择器, text=元素文本, not_text=元素不允许存在的文本
+        selector, text:None|str=None, not_text:None|str=None,
+        #[参数] 指定第 index 个元素，默认'all'返回所有元素
+        index:None|int=None,
+        #[参数] 指定要触发的键名, ['left','right','middle']=[左,中,右]
+        key:Literal['left','right','middle']='left'
+    ) -> Literal['return']:
 
-        DOM = None
-
+        DOM :Locator = None
         if type(index) == int:
-            DOM = self.page.locator(css_selector, has_text= text if type(text) == str else None).nth(index)
+            DOM = self.page.locator(selector, has_text=text, has_not_text=not_text).nth(index)
+        elif index in None:
+            DOM = self.page.locator(selector, has_text=text, has_not_text=not_text)
         else:
-            DOM = self.page.locator(css_selector, has_text= text if type(text) == str else None)
+            raise ValueError('#-> \'index\' 参数值错误')
 
         #手动移动到元素中心点击，防止出现遮罩阻挡点击事件
         DOM.hover()
@@ -130,62 +175,81 @@ class Generated_page:
         self.page.mouse.up(button=key)
 
     #[定义方法] 获取元素坐标
-    def get_element_coordinate(self, css_selector, text:None|str=None, index:None|int=None,):
+    def get_element_coordinate(self,
+        #[参数] selector=选择器, text=元素文本, not_text=元素不允许存在的文本
+        selector, text:None|str=None, not_text:None|str=None,
+        #[参数] 指定第 index 个元素, 默认'all'返回所有元素
+        index:None|int=None,
+    ) -> tuple[float, float]:
 
-        DOM = None
-
-        if type(text) == str:
-
-            DOM_list = self.page.locator(css_selector, has_text=text).all()
-
-            if type(index) == int:
-                DOM = DOM_list[index]
-            else:
-                DOM = DOM_list[0]
-
+        DOM :Locator = None
+        if type(index) == int:
+            DOM = self.page.locator(selector, has_text=text, has_not_text=not_text).nth(index)
+        elif index in None:
+            DOM = self.page.locator(selector, has_text=text, has_not_text=not_text)
         else:
-
-            DOM_list = self.page.locator(css_selector).all()
-
-            if type(index) == int:
-                DOM = DOM_list[index]
-            else:
-                DOM = DOM_list[0]
-
+            raise ValueError('#-> \'index\' 参数值错误')
         box = DOM.bounding_box()
-        x = box['x'] + box['width'] / 2
-        y = box['y'] + box['height'] / 2
+        x = float(box['x'] + box['width'] / 2)
+        y = float(box['y'] + box['height'] / 2)
         return (x,y)
 
     #[定义方法] 按下单个鼠标按键
-    def mouse_down(self, button:Literal['left','right','middle']='left'):
+    def mouse_down(self,
+        #[参数] 指定要按下的键名, ['left','right','middle']=[左,中,右]
+        button:Literal['left','right','middle']='left'
+    ) -> Literal['return']:
         self.page.mouse.down(button=button)
     #[定义方法] 抬起单个鼠标按键
-    def mouse_up(self, button:Literal['left','right','middle']='left'):
+    def mouse_up(self,
+        #[参数] 指定要按下的键名, ['left','right','middle']=[左,中,右]
+        button:Literal['left','right','middle']='left'
+    ) -> Literal['return']:
         self.page.mouse.up(button=button)
     #[定义方法] 鼠标平面移动
-    def mouse_move(self, x, y, steps:None|int=None):
+    def mouse_move(self,
+        #[参数] x,y=屏幕坐标(像素值:float)
+        x, y,
+        #[参数] 移动步数, 值越大移动越慢, (1 为瞬间移动), (None 为 playwright 自己判断移动)
+        steps:None|int=None
+    ) -> Literal['return']:
         self.page.mouse.move(x, y, steps=steps)
     #[定义方法] 模拟鼠标滚轮上下滚动
-    def mouse_wheel(self, delta_x=0, delta_y=500, Declaration='正数默认向[右,下]方移动，负数为相反方向'):
+    def mouse_wheel(self,
+        #[参数] 横向滚动的像素距离, [正,负]=[右,左]
+        delta_x=0,
+        #[参数] 横向滚动的像素距离, [正,负]=[下,上]
+        delta_y=500
+    ) -> Literal['return']:
         self.page.mouse.wheel(delta_x, delta_y)
 
     #[定义方法] 按下单个键盘按键
-    def key_down(self, key):
+    def key_down(self,
+        #[参数] 指定按下的键名
+        key:str
+    ) -> Literal['return']:
         self.page.keyboard.press(key)
     #[定义方法] 抬起单个键盘按键
-    def key_up(self, key):
+    def key_up(self,
+        #[参数] 指定抬起的键名
+        key:str
+    ) -> Literal['return']:
         self.page.keyboard.up(key)
 
     #[定义方法] 保存登录态为 JSON 文件
-    def save_LogIn_state(self, FilePath):
-        self.page.context.storage_state(path=FilePath)
+    def save_LogIn_state(self,
+        #[参数] 指定文件的写入路径
+        file_path:str
+    ) -> Literal['return']:
+        self.page.context.storage_state(path=file_path)
 
     #[定义方法] 返回页面HTML源代码
-    def html(self):
+    def html(self) -> str:
         return self.page.content()
 
     #[定义方法] 关闭实例
-    def close(self):
+    def close(self) -> Literal['close']:
+        for page in self.browser.contexts:
+            page.close()
         self.browser.close()
         self.playwright_.stop()
