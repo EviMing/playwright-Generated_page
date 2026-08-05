@@ -2,6 +2,12 @@
 #[伊茗的GitHub仓库] = 'https://github.com/EviMing/'
     #此文件所处项目 = 'https://github.com/EviMing/playwright-Generated_page'
 
+'''多个项目需要同一个文件时：
+import sys
+sys.path.append("../#Generated_page") #目录路径
+from Generated_page import Generated_page #pyright: ignore[reportMissingImports]
+'''
+
 from playwright.sync_api import sync_playwright, Locator, JSHandle
 from playwright_stealth import Stealth
 from typing import Literal, Any
