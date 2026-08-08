@@ -1,3 +1,7 @@
+#作者：伊茗(微信：EviMing, QQ：2368199809, 邮箱：2368199809@qq.com)
+#[伊茗的GitHub仓库] = 'https://github.com/EviMing/'
+    #此文件所处项目 = 'https://github.com/EviMing/playwright-Generated_page'
+
 from playwright.async_api import async_playwright, Page, Locator, JSHandle
 from playwright_stealth import Stealth
 import asyncio
@@ -10,7 +14,7 @@ timeout = 30
 
 #[定义类] 生成安全的上下文实例并提供生成异步 page 的方法
 class async_Generated_context:
-    '每个异步 page 允许 \'await page.方法\' 直接运行, 或使用库提供的 \'async_{0,1}eval_pages\' 方法批量运行'
+    '每个异步 page 允许 \'await 函数(page对象, 参数)\' 直接运行, 或使用库提供的 \'async_{0,1}eval_pages\' 方法批量运行'
 
     #[定义实例] 生成安全的上下文实例
     async def __init__(self,
