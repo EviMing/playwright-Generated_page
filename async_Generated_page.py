@@ -14,7 +14,7 @@ timeout = 30
 
 #[定义类] 生成安全的上下文实例并提供生成异步 page 的方法
 class async_Generated_context:
-    '每个异步 page 允许 \'await 函数(page对象, 参数)\' 直接运行, 或使用库提供的 \'async_{0,1}eval_pages\' 方法批量运行'
+    '每个异步 page 允许 \'await 函数(page对象, 参数)\' 直接运行, 或使用库提供的 \'`(async_){0,1}eval_pages`\' 方法批量运行'
 
     #[定义实例] 生成安全的上下文实例
     async def __init__(self,
