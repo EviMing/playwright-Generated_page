@@ -2,31 +2,69 @@
 #[伊茗的GitHub仓库] = 'https://github.com/EviMing/'
     #此文件所处项目 = 'https://github.com/EviMing/playwright-Main_Lib'
 
-from playwright.async_api import async_playwright, Page, Locator, JSHandle
+'链式操作 = await async_Generated_Browser_MainClass(**参数).get_Context(**参数).get_Page()'
+
+from playwright.async_api import async_playwright, Browser, BrowserContext, Page, Locator, JSHandle
 from playwright_stealth import Stealth
 import asyncio
 from typing import Literal, Any
 from random import uniform
 import traceback
+import sys
 
 #[变量] 指定全局的 timeout(单位=秒)
-timeout = 30
+global_timeout = 30
 
-#[定义类] 生成安全的上下文实例并提供生成异步 page 的方法
-class async_Generated_context:
-    '每个异步 page 允许 \'await 函数(page对象, 参数)\' 或 \'await page对象.原生方法\' 直接运行, 或使用库提供的 \'`(async_){0,1}eval_pages`\' 方法批量运行'
+#[定义标识类] 函数运行时有报错被拦截则返回此类, 用于判断是否存在报错
+class IsError(Exception):
+    pass
+
+#[定义接口类] 让主类有更方便的生成上下文方法, 并提供更生成异步 page 的方法
+class async_Generated_Context:
+
+    #[定义属性] 无
+    async def __init__(self,
+        #[参数] 已有的浏览器实例
+        browser:Browser,
+        #[参数] 是否从文件获取登录态
+        LogIn_state_FilePath:None|str=None,
+    ):
+        #创建上下文实例
+        self.context :BrowserContext =  None
+        #判断是否从文件获取登录态
+        if type(LogIn_state_FilePath) == str:
+            self.context = await browser.new_context(storage_state=LogIn_state_FilePath)
+        else:
+            self.context = await browser.new_context()
+
+        #创建 Stealth 实例
+        stealth = Stealth(
+            #设置语言偏好
+            navigator_languages_override=("zh-CN", "zh"),
+            #是否(仅通过初始化脚本注入 stealth 代码，而不使用其他注入方式)
+            init_scripts_only=False
+        )
+        #手动伪装上下文
+        stealth.apply_stealth_async(self.context)
+
+    #[定义方法] 返回一个接口类(浏览器上下文)实例
+    async def get_Page(self,
+    ) -> Page:
+        '每个异步 page 允许 \'await 函数(page对象, 参数)\' 或 \'await page对象.原生方法\' 直接运行, 或使用库提供的 \'`(async_){0,1}eval_pages`\' 方法批量运行'
+        return await self.context.new_page()
+
+#[定义类] 生成安全的浏览器实例并调用接口类达到链式操作
+class async_Generated_Browser:
 
     #[定义实例] 生成安全的上下文实例
     async def __init__(self,
-        #[参数] 是否从文件获取登录态
-        LogIn_state_FilePath:None|str=None,
         #[参数] 是否显示浏览器窗口
         look_window=False,
         #[参数]指定浏览器路径
         browser_path=r"D:\Quark\quark.exe",
         proxy:None|dict[str,str]=None,
         #[参数] 全局每一步行动后应 sleep 的毫秒数
-        sleep_float:float=100
+        sleep_ms:int=100
     ):
         #代理字典
         proxy_ = {}
@@ -54,37 +92,24 @@ class async_Generated_context:
         self.browser = await self.playwright.chromium.launch(
             executable_path=browser_path,
             headless= not look_window,
-            slow_mo=sleep_float,
+            slow_mo=sleep_ms,
             proxy= proxy_ if proxy else None
         )
 
-        self.context =  None
-        #创建上下文实例
-        if type(LogIn_state_FilePath) == str:
-            #参数 LogIn_from_file == True 时，从文件获取登录态
-            self.context = await self.browser.new_context(storage_state=LogIn_state_FilePath)
-        else:
-            self.context = await self.browser.new_context()
+    #[定义方法] 生成并返回一个浏览器上下文
+    async def get_Context(self,
+        #[参数] 是否从文件获取登录态
+        LogIn_state_FilePath:None|str=None
+    ) -> async_Generated_Context:
 
-        #创建 Stealth 实例
-        stealth = Stealth(
-            #设置语言偏好
-            navigator_languages_override=("zh-CN", "zh"),
-            #是否(仅通过初始化脚本注入 stealth 代码，而不使用其他注入方式)
-            init_scripts_only=False
-        )
-        #手动装饰上下文实例
-        stealth.apply_stealth_sync(self.context)
-
-    #[定义方法] 生成并返回一个异步 page
-    async def get_page(self) -> Page:
-        return await self.context.new_page()
+        return async_Generated_Context(self.browser, LogIn_state_FilePath)
 
     #[定义方法] 关闭实例
     async def close(self):
-        for page in self.browser.contexts:
-            await page.close()
-        await self.context.close()
+        for context in self.browser.contexts:
+            for page in context.pages:
+                await page.close()
+            await context.close()
         await self.browser.close()
         await self.playwright.stop()
 
@@ -96,7 +121,7 @@ def page_get_url(
     return (x if (x:= page.url) else None)
 
 #[定义函数] 跳转页面
-async def page_goto(
+async def async_goto(
     page:Page,
     #[参数] 跳转的目标 URL
     url,
@@ -105,12 +130,12 @@ async def page_goto(
     #[参数] 指定来源 URL, 默认为跳转前的 URL
     referer:None|str|Literal['page.url']='page.url',
     #[参数] timeout(单位=秒)，默认使用全局 timeout
-    timeout:int|Literal['self.timeout']='self.timeout'
+    timeout:int|Literal['global_timeout']='global_timeout'
 ):
-    await page.goto(url, wait_until=wait_until, referer=(page_get_url(page) if referer == 'page.url' else (referer if type(referer) == str else None)), timeout=int((timeout if timeout == 'self.timeout' else timeout)*1000))
+    await page.goto(url, wait_until=wait_until, referer=(page_get_url(page) if referer == 'page.url' else (referer if type(referer) == str else None)), timeout=int((global_timeout if timeout == 'global_timeout' else timeout)*1000))
 
 #[定义函数] 执行JS代码
-async def page_eval_js(
+async def async_eval_js(
     page:Page,
     #[参数] JavaScript 代码
     js_code,
@@ -120,7 +145,7 @@ async def page_eval_js(
     return await page.evaluate(js_code, parameter)
 
 #[定义函数] 执行JS代码并返回JSHandle对象
-async def page_eval_js_handle(
+async def async_eval_js_handle(
     page:Page,
     #[参数] JavaScript 代码
     js_code,
@@ -130,19 +155,19 @@ async def page_eval_js_handle(
     return await page.evaluate_handle(js_code, parameter)
 
 #[定义函数] 等待元素出现
-async def page_waiting_DOM(
+async def async_waiting_DOM(
     page:Page,
     #[参数] selector=选择器, text=元素文本, not_text=元素不允许存在的文本
     selector:str, text:None|str=None, not_text:None|str=None,
     #[参数] 元素存在的最小个数
     min_number:int=1,
     #[参数] timeout(单位=秒), 默认使用全局 timeout
-    timeout:int|Literal['self.timeout']='self.timeout'
+    timeout:int|Literal['global_timeout']='global_timeout'
 ):
-    await page.locator(selector, has_text=text, has_not_text=not_text).nth(min_number-1).wait_for(timeout=int((timeout if timeout == 'self.timeout' else timeout)*1000))
+    await page.locator(selector, has_text=text, has_not_text=not_text).nth(min_number-1).wait_for(timeout=int((global_timeout if timeout == 'global_timeout' else timeout)*1000))
 
 #[定义函数] 利用CSS选择器获取 DOM元素 或 元素的属性值
-async def page_get_DOM(
+async def async_get_DOM(
     page:Page,
     #[参数] selector=选择器, text=元素文本, not_text=元素不允许存在的文本
     selector:str, text:None|str=None, not_text:None|str=None,
@@ -176,12 +201,33 @@ async def page_get_DOM(
     else:
         return (list_or_locator if type(list_or_locator) == list else list_or_locator[index])
 
-#[定义函数] 点击元素
-async def page_click(
+#[定义函数] 获取元素坐标
+async def async_get_DOM_coordinate(
     page:Page,
     #[参数] selector=选择器, text=元素文本, not_text=元素不允许存在的文本
     selector, text:None|str=None, not_text:None|str=None,
-    #[参数] 指定第 index 个元素，默认'all'返回所有元素
+    #[参数] 指定第 index 个元素, 默认选中第一个, 未指定 index 且元素数量大于 1 则报错
+    index:None|int=None,
+) -> tuple[float, float]:
+
+    DOM :Locator = None
+    if type(index) == int:
+        DOM = await page.locator(selector, has_text=text, has_not_text=not_text).nth(index)
+    elif index in None:
+        DOM = await page.locator(selector, has_text=text, has_not_text=not_text)
+    else:
+        raise ValueError('#-> \'index\' 参数值错误')
+    box = await DOM.bounding_box()
+    x = float(box['x'] + box['width'] / 2)
+    y = float(box['y'] + box['height'] / 2)
+    return (x,y)
+
+#[定义函数] 点击元素
+async def async_click(
+    page:Page,
+    #[参数] selector=选择器, text=元素文本, not_text=元素不允许存在的文本
+    selector, text:None|str=None, not_text:None|str=None,
+    #[参数] 指定第 index 个元素, 默认选中第一个, 未指定 index 且元素数量大于 1 则报错
     index:None|int=None,
     #[参数] 指定要触发的键名, ['left','right','middle']=[左,中,右]
     key:Literal['left','right','middle']='left'
@@ -200,69 +246,46 @@ async def page_click(
     await asyncio.sleep(uniform(0.1, 0.2))
     page.mouse.up(button=key)
 
-#[定义函数] 获取元素坐标
-async def page_get_element_coordinate(
-    page:Page,
-    #[参数] selector=选择器, text=元素文本, not_text=元素不允许存在的文本
-    selector, text:None|str=None, not_text:None|str=None,
-    #[参数] 指定第 index 个元素, 默认'all'返回所有元素
-    index:None|int=None,
-) -> tuple[float, float]:
-
-    DOM :Locator = None
-    if type(index) == int:
-        DOM = await page.locator(selector, has_text=text, has_not_text=not_text).nth(index)
-    elif index in None:
-        DOM = await page.locator(selector, has_text=text, has_not_text=not_text)
-    else:
-        raise ValueError('#-> \'index\' 参数值错误')
-    box = await DOM.bounding_box()
-    x = float(box['x'] + box['width'] / 2)
-    y = float(box['y'] + box['height'] / 2)
-    return (x,y)
-
 #[定义函数] 按下单个鼠标按键
-async def page_mouse_down(
+async def async_mouse_down(
     page:Page,
     #[参数] 指定要按下的键名, ['left','right','middle']=[左,中,右]
     button:Literal['left','right','middle']='left'
 ):
     await page.mouse.down(button=button)
 #[定义函数] 抬起单个鼠标按键
-async def page_mouse_up(
+async def async_mouse_up(
     page:Page,
     #[参数] 指定要按下的键名, ['left','right','middle']=[左,中,右]
     button:Literal['left','right','middle']='left'
 ):
     await page.mouse.up(button=button)
 #[定义函数] 鼠标平面移动
-async def page_mouse_move(
+async def async_mouse_move(
     page:Page,
     #[参数] x,y=屏幕坐标(像素值:float)
-    x, y,
+    px_tuple:tuple[float,float],
     #[参数] 移动步数, 值越大移动越慢, (1 为瞬间移动), (None 为 playwright 自己判断移动)
     steps:None|int=None
 ):
-    await page.mouse.move(x, y, steps=steps)
+    await page.mouse.move(*px_tuple, steps=steps)
 #[定义函数] 模拟鼠标滚轮上下滚动
-async def page_mouse_wheel(
+async def async_mouse_wheel(
     page:Page,
-    #[参数] 横向滚动的像素距离, [正,负]=[右,左]
-    delta_x=0,
-    #[参数] 横向滚动的像素距离, [正,负]=[下,上]
-    delta_y=500
+    #[参数] 横向滚动的像素距离, [正,负]=[右,左], 横向滚动的像素距离, [正,负]=[下,上]
+    wheel_px_tuple:tuple[float,float]=(0,500)
 ):
-    await page.mouse.wheel(delta_x, delta_y)
+    await page.mouse.wheel(*wheel_px_tuple)
 
 #[定义函数] 按下单个键盘按键
-async def page_key_down(
+async def async_key_down(
     page:Page,
     #[参数] 指定按下的键名
     key:str
 ):
     await page.keyboard.press(key)
 #[定义函数] 抬起单个键盘按键
-async def page_key_up(
+async def async_key_up(
     page:Page,
     #[参数] 指定抬起的键名
     key:str
@@ -270,7 +293,7 @@ async def page_key_up(
     await page.keyboard.up(key)
 
 #[定义函数] 保存登录态为 JSON 文件
-async def page_save_LogIn_state(
+async def async_save_LogIn_state(
     page:Page,
     #[参数] 指定文件的写入路径
     file_path:str
@@ -278,7 +301,7 @@ async def page_save_LogIn_state(
     await page.context.storage_state(path=file_path)
 
 #[定义函数] 返回页面 HTML 源代码
-async def page_html(
+async def async_html(
     page:Page
 ) -> str:
     return await page.content()
@@ -286,44 +309,47 @@ async def page_html(
 """[定义函数] 异步运行大量 page 操作"""
 #[定义函数] 异步运行多个 page 操作
 async def async_eval_pages(
-    #[参数] 调用字典 -> {page对象: (调用对象, (None(无参数)|{'参数名': 参数值,})),}
-    run_dict: dict[Page, tuple[(function|type), (None|dict[str, Any])]],
-    error_log_dir: str = './'
-) -> list[Any]:
-    'run_dict = {Page: ((function|type), (None|dict[str, Any]))}'
-
+    #[参数] 存储每一个任务元组的列表 -> [(page对象, (调用对象, (None(无参数)|{'参数名': 参数值,}))),]
+    run_list: list[tuple[Page, tuple[function|type, dict[str,Any]|None]]]
+) -> list[dict[Any, None] | dict[IsError,tuple[type,str,str]]]:
+    ':return list[dict[执行结果, None] | dict[IsError(类本身), tuple[报错类本身, 报错字符串, 报错链字符串]]]'
     #包装单个任务
-    async def _run(index:int, page:Page, func:function, kwargs:None|dict[str,Any]):
+    async def _run(page:Page, func:function, kwargs:None|dict[str,Any]) -> dict[Any,None] | dict[IsError,tuple[type,str,str]]:
         try:
             #判断传入的 func 是否为异步函数
             if asyncio.iscoroutinefunction(func):
                 #异步函数使用 await 执行
-                return await func(page, **kwargs)
+                if kwargs:
+                    return {await func(page, **kwargs): None}
+                else:
+                    return {await func(page): None}
             else:
                 #同步函数直接调用执行
-                return func(page, **kwargs)
+                if kwargs:
+                    return {func(page, **kwargs): None}
+                else:
+                    return {func(page): None}
         except KeyboardInterrupt:
             raise KeyboardInterrupt
         except SystemExit:
             raise SystemExit
-        #捕捉非安全的报错并写入文件
+        #捕捉非安全的报错 并 以报错字典形式返回
         except:
-            with open(f"{error_log_dir}/{index}_error.log", "w", encoding="UTF-8") as f:
-                f.write(traceback.format_exc())
-
-    #构建并发任务列表，传入 page 在字典中的顺序索引
-    tasks = [
-        (_run(page_index, page, func, run_data) if run_data else _run(page_index, page, func))
-        for page_index, (page, (func, run_data)) in enumerate(run_dict.items())
+            error_class, error_str, all_error = sys.exc_info()
+            #打印报错并返回报错字典
+            return {IsError: (error_class, str(error_str), traceback.format_exc())}
+    #构建并发任务列表
+    tasks = [ 
+        (_run(page, func, run_data) if run_data else _run(page, func))
+        for (page, (func, run_data)) in run_list
     ]
-
     #并发调度所有任务并返回结果
     return await asyncio.gather(*tasks)
 #[定义函数] 同步模式下直接运行 async_eval_pages 方法
 def eval_pages(
-    #[参数] 调用字典 -> {page对象: (调用对象, (None(无参数)|{'参数名': 参数值,})),}
-    run_dict: dict[Page, tuple[function|type, (None|dict[str,Any])]],
-    error_log_dir: str = './'
-) -> list[Any]:
+    #[参数] 存储每一个任务元组的列表 -> [(page对象, (调用对象, (None(无参数)|{'参数名': 参数值,}))),]
+    run_list: list[tuple[Page, tuple[function|type, dict[str,Any]|None]]]
+) -> list[dict[Any, None] | dict[IsError,tuple[type,str,str]]]:
+    ':return list[dict[执行结果, None] | dict[IsError(类本身), tuple[报错类本身, 报错字符串, 报错链字符串]]]'
     #直接使用 asyncio.run() 运行异步评估函数 (run 函数会自动处理事件循环的创建和销毁)
-    return asyncio.run(async_eval_pages(run_dict, error_log_dir))
+    return asyncio.run(async_eval_pages(run_list))
