@@ -2,7 +2,7 @@
 #[伊茗的GitHub仓库] = 'https://github.com/EviMing/'
     #此文件所处项目 = 'https://github.com/EviMing/playwright-Main_Lib'
 
-'链式操作 = await async_Generated_Browser_MainClass(**参数).get_Context(**参数).get_Page()'
+'链式操作 = await (await (await (async_Generated_Browser()).run(**参数)).get_Context(**参数)).get_Page()'
 
 from playwright.async_api import async_playwright, Browser, BrowserContext, Page, Locator, JSHandle
 from playwright_stealth import Stealth
@@ -23,7 +23,11 @@ class IsError(Exception):
 class async_Generated_Context:
 
     #[定义属性] 无
-    async def __init__(self,
+    def __init__(self):
+        pass
+
+    #[定义方法] 主逻辑
+    async def run(self,
         #[参数] 已有的浏览器实例
         browser:Browser,
         #[参数] 是否从文件获取登录态
@@ -47,6 +51,9 @@ class async_Generated_Context:
         #手动伪装上下文
         stealth.apply_stealth_async(self.context)
 
+        #为了方便链式调用, 返回 self
+        return self
+
     #[定义方法] 返回一个接口类(浏览器上下文)实例
     async def get_Page(self,
     ) -> Page:
@@ -56,8 +63,12 @@ class async_Generated_Context:
 #[定义类] 生成安全的浏览器实例并调用接口类达到链式操作
 class async_Generated_Browser:
 
-    #[定义实例] 生成安全的上下文实例
-    async def __init__(self,
+    #[定义属性] 无
+    def __init__(self):
+        pass
+
+    #[定义方法] 主逻辑
+    async def run(self,
         #[参数] 是否显示浏览器窗口
         look_window=False,
         #[参数]指定浏览器路径
@@ -96,13 +107,15 @@ class async_Generated_Browser:
             proxy= proxy_ if proxy else None
         )
 
-    #[定义方法] 生成并返回一个浏览器上下文
+        #为了方便链式调用, 返回 self
+        return self
+
+    #[定义方法] 生成并返回一个 接口类(浏览器上下文) 实例
     async def get_Context(self,
         #[参数] 是否从文件获取登录态
         LogIn_state_FilePath:None|str=None
     ) -> async_Generated_Context:
-
-        return async_Generated_Context(self.browser, LogIn_state_FilePath)
+        return await (async_Generated_Context()).run(self.browser, LogIn_state_FilePath)
 
     #[定义方法] 关闭实例
     async def close(self):
